@@ -1,25 +1,68 @@
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class MyToDoList extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = { items: [], text: ""};
+    this.valChange = this.valChange.bind(this);
+    this.valSubmit = this.valSubmit.bind(this);
+  }
+
+  render() {
+    return (
+      <div className="App-header">
+        <h1>حليب</h1>
+        <h2>My Fancy To Do List</h2>
+        <TodoList items={this.state.items} />
+        <form onSubmit={this.valSubmit}>
+          <label htmlFor="new-todo">
+            What should we do next?
+          </label>
+            <input 
+            id="new-todo"
+            onChange={this.valChange}
+            value={this.state.text}
+            />
+            <button>
+              Add #{this.state.items.length +1}
+            </button>
+        </form>
+      </div>
+    );
+  }
+
+  valChange(e){
+    this.setState({text: e.target.value})
+  }
+
+  valSubmit(e){
+    e.preventDefault();
+    if(!this.state.text.length){
+      return;
+    }
+    const newItem = {
+      text: this.state.text,
+      id: Date.now()
+    };
+
+    this.setState(state => ({
+      items: state.items.concat(newItem),
+      text: ""
+    }));
+  }
 }
 
-export default App;
+class TodoList extends React.Component{
+  render(){
+    return (
+      <ul>
+        {this.props.items.map(item => (
+          <li key={item.id}>{item.text}</li>
+        ))}
+      </ul>
+    );
+  }
+}
+
+export default MyToDoList;
