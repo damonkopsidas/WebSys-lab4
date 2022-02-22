@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
 import './App.css';
+import { useQuery } from 'react-query';
+import axios from 'axios';
 
 class MyToDoList extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-    this.state = { items: [], text: ""};
+    this.state = { items: [], text: "" };
     this.valChange = this.valChange.bind(this);
     this.valSubmit = this.valSubmit.bind(this);
+    this.storeItems = this.storeItems.bind(this);
+    this.getItems = this.getItems.bind(this);
   }
 
   render() {
@@ -19,26 +23,36 @@ class MyToDoList extends React.Component {
           <label htmlFor="new-todo">
             What should we do next?
           </label>
-            <input 
+          <input
             id="new-todo"
             onChange={this.valChange}
             value={this.state.text}
-            />
-            <button>
-              Add #{this.state.items.length +1}
-            </button>
+          />
+
+          <button>
+            Add #{this.state.items.length + 1}
+          </button>
+
+          <button onClick={this.storeItems}>
+            Store {this.state.items.length} item list
+          </button>
+
+          <button onClick={this.getItems}>
+            Retrieve last saved list
+          </button>
+
         </form>
       </div>
     );
   }
 
-  valChange(e){
-    this.setState({text: e.target.value})
+  valChange(e) {
+    this.setState({ text: e.target.value })
   }
 
-  valSubmit(e){
+  valSubmit(e) {
     e.preventDefault();
-    if(!this.state.text.length){
+    if (!this.state.text.length) {
       return;
     }
     const newItem = {
@@ -51,10 +65,47 @@ class MyToDoList extends React.Component {
       text: ""
     }));
   }
+
+  getItems(e) {
+    console.log("Getting Items")
+    e.preventDefault();
+    var todos = "woop"
+    axios.get('http://127.0.0.1:8080/todo').then((response) => {
+      todos = response.data;
+      console.log(todos)
+      todos.forEach(element => {
+        const newItem = {
+          text: element.todoText,
+          id: Date.now()
+        };
+        this.setState(state => ({
+          items: state.items.concat(newItem),
+          text: ''
+        }));
+      })
+    });
+  }
+
+  storeItems(e) {
+    console.log("Storing items")
+    e.preventDefault();
+    
+    var state = this.state;
+    console.log(state)
+    // First clear the old list in the database:
+    axios.delete("http://127.0.0.1:8080/todo", { crossdomain: true }).then((response) => {
+      state.items.forEach(element => {
+        var requestURI = "http://127.0.0.1:8080/todo?input1=" + element.id + "&input2=" + element.text
+        console.log(requestURI)
+        axios.post(requestURI)
+      })
+    })
+  }
 }
 
-class TodoList extends React.Component{
-  render(){
+
+class TodoList extends React.Component {
+  render() {
     return (
       <ul>
         {this.props.items.map(item => (
